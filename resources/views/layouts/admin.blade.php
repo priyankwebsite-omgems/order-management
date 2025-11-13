@@ -645,24 +645,24 @@
                         <span>Dashboard</span>
                     </a>
                 </li>
-                <li>
-                    <a class="nav-link {{ request()->routeIs('admins.*') ? 'active' : '' }}"
-                        href="{{ route('admins.index') }}" data-tooltip="Admins">
-                        <i class="bi bi-people"></i>
-                        <span>Admins</span>
-                    </a>
-                </li>
 
-                @php
-                    $canSeePermissions =
-                        isset($currentAdmin) &&
-                        $currentAdmin &&
-                        ($currentAdmin->is_super ||
-                            $currentAdmin->hasPermission('permissions.view') ||
-                            $currentAdmin->hasPermission('permissions.create'));
-                @endphp
+                @if (
+                        auth()->guard('admin')->user() && auth()->guard('admin')
+                            ->user()->canAccessAny(['admins.view', 'admins.create'])
+                    )
+                    <li>
+                        <a class="nav-link {{ request()->routeIs('admins.*') ? 'active' : '' }}"
+                            href="{{ route('admins.index') }}" data-tooltip="Admins">
+                            <i class="bi bi-people"></i>
+                            <span>Admins</span>
+                        </a>
+                    </li>
+                @endif
 
-                @if ($canSeePermissions)
+                @if (
+                        auth()->guard('admin')->user() && auth()->guard('admin')
+                            ->user()->canAccessAny(['permissions.view', 'permissions.create'])
+                    )
                     <li>
                         <a class="nav-link {{ request()->routeIs('permissions.*') ? 'active' : '' }}"
                             href="{{ route('permissions.index') }}" data-tooltip="Permissions">
@@ -672,16 +672,10 @@
                     </li>
                 @endif
 
-                @php
-                    $canSeeOrders =
-                        isset($currentAdmin) &&
-                        $currentAdmin &&
-                        ($currentAdmin->is_super ||
-                            $currentAdmin->hasPermission('orders.view') ||
-                            $currentAdmin->hasPermission('orders.create'));
-                @endphp
-
-                @if ($canSeeOrders)
+                @if (
+                        auth()->guard('admin')->user() && auth()->guard('admin')
+                            ->user()->canAccessAny(['orders.view', 'orders.create'])
+                    )
                     <li>
                         <a class="nav-link {{ request()->routeIs('orders.*') ? 'active' : '' }}"
                             href="{{ route('orders.index') }}" data-tooltip="Orders">
@@ -691,35 +685,36 @@
                     </li>
                 @endif
 
-                <li>
-                    <a class="nav-link {{ request()->routeIs('chat.*') ? 'active' : '' }}"
-                        href="{{ route('chat.index') }}" data-tooltip="Chat">
-                        <i class="bi bi-chat-dots"></i>
-                        <span>Chat</span>
-                    </a>
-                </li>
+                @if (
+                        auth()->guard('admin')->user() && auth()->guard('admin')
+                            ->user()->canAccessAny(['chat.access'])
+                    )
+                    <li>
+                        <a class="nav-link {{ request()->routeIs('chat.*') ? 'active' : '' }}"
+                            href="{{ route('chat.index') }}" data-tooltip="Chat">
+                            <i class="bi bi-chat-dots"></i>
+                            <span>Chat</span>
+                        </a>
+                    </li>
+                @endif
             </ul>
 
-            @php
-                $canSeeAttributes =
-                    isset($currentAdmin) &&
-                    $currentAdmin &&
-                    ($currentAdmin->is_super ||
-                        $currentAdmin->hasPermission('metal_types.view') ||
-                        $currentAdmin->hasPermission('stone_colors.view'));
-            @endphp
 
-            @if ($canSeeAttributes)
-                <div class="nav-dropdown">
-                    <button class="dropdown-toggle-link" id="attributesDropdown" data-tooltip="Attributes">
-                        <div class="left-content">
-                            <i class="bi bi-grid main-icon"></i>
-                            <span>Attributes</span>
-                        </div>
-                        <i class="bi bi-chevron-down chevron-icon"></i>
-                    </button>
-                    <div class="dropdown-menu-custom" id="attributesMenu">
-                        <ul class="nav">
+            <div class="nav-dropdown">
+                <button class="dropdown-toggle-link" id="attributesDropdown" data-tooltip="Attributes">
+                    <div class="left-content">
+                        <i class="bi bi-grid main-icon"></i>
+                        <span>Attributes</span>
+                    </div>
+                    <i class="bi bi-chevron-down chevron-icon"></i>
+                </button>
+                <div class="dropdown-menu-custom" id="attributesMenu">
+                    <ul class="nav">
+
+                        @if (
+                                auth()->guard('admin')->user() && auth()->guard('admin')
+                                    ->user()->canAccessAny(['companies.view', 'companies.create'])
+                            )
                             <li>
                                 <a class="nav-link {{ request()->routeIs('companies.*') ? 'active' : '' }}"
                                     href="{{ route('companies.index') }}" data-tooltip="Companies">
@@ -727,6 +722,12 @@
                                     <span>Company</span>
                                 </a>
                             </li>
+                        @endif
+
+                        @if (
+                                auth()->guard('admin')->user() && auth()->guard('admin')
+                                    ->user()->canAccessAny(['metal_types.view', 'metal_types.create'])
+                            )
                             <li>
                                 <a class="nav-link {{ request()->routeIs('metal_types.*') ? 'active' : '' }}"
                                     href="{{ route('metal_types.index') }}" data-tooltip="Metal Types">
@@ -734,6 +735,12 @@
                                     <span>Metal Types</span>
                                 </a>
                             </li>
+                        @endif
+
+                        @if (
+                                auth()->guard('admin')->user() && auth()->guard('admin')
+                                    ->user()->canAccessAny(['setting_types.view', 'setting_types.create'])
+                            )
                             <li>
                                 <a class="nav-link {{ request()->routeIs('setting_types.*') ? 'active' : '' }}"
                                     href="{{ route('setting_types.index') }}" data-tooltip="Setting Types">
@@ -741,6 +748,12 @@
                                     <span>Setting Types</span>
                                 </a>
                             </li>
+                        @endif
+
+                        @if (
+                                auth()->guard('admin')->user() && auth()->guard('admin')
+                                    ->user()->canAccessAny(['closure_types.view', 'closure_types.create'])
+                            )
                             <li>
                                 <a class="nav-link {{ request()->routeIs('closure_types.*') ? 'active' : '' }}"
                                     href="{{ route('closure_types.index') }}" data-tooltip="Closure Types">
@@ -748,6 +761,12 @@
                                     <span>Closure Types</span>
                                 </a>
                             </li>
+                        @endif
+
+                        @if (
+                                auth()->guard('admin')->user() && auth()->guard('admin')
+                                    ->user()->canAccessAny(['ring_sizes.view', 'ring_sizes.create'])
+                            )
                             <li>
                                 <a class="nav-link {{ request()->routeIs('ring_sizes.*') ? 'active' : '' }}"
                                     href="{{ route('ring_sizes.index') }}" data-tooltip="Ring Sizes">
@@ -755,6 +774,12 @@
                                     <span>Ring Sizes</span>
                                 </a>
                             </li>
+                        @endif
+
+                        @if (
+                                auth()->guard('admin')->user() && auth()->guard('admin')
+                                    ->user()->canAccessAny(['stone_types.view', 'stone_types.create'])
+                            )
                             <li>
                                 <a class="nav-link {{ request()->routeIs('stone_types.*') ? 'active' : '' }}"
                                     href="{{ route('stone_types.index') }}" data-tooltip="Stone Types">
@@ -762,6 +787,12 @@
                                     <span>Stone Types</span>
                                 </a>
                             </li>
+                        @endif
+
+                        @if (
+                                auth()->guard('admin')->user() && auth()->guard('admin')
+                                    ->user()->canAccessAny(['stone_shapes.view', 'stone_shapes.create'])
+                            )
                             <li>
                                 <a class="nav-link {{ request()->routeIs('stone_shapes.*') ? 'active' : '' }}"
                                     href="{{ route('stone_shapes.index') }}" data-tooltip="Stone Shapes">
@@ -769,6 +800,12 @@
                                     <span>Stone Shapes</span>
                                 </a>
                             </li>
+                        @endif
+
+                        @if (
+                                auth()->guard('admin')->user() && auth()->guard('admin')
+                                    ->user()->canAccessAny(['stone_colors.view', 'stone_colors.create'])
+                            )
                             <li>
                                 <a class="nav-link {{ request()->routeIs('stone_colors.*') ? 'active' : '' }}"
                                     href="{{ route('stone_colors.index') }}" data-tooltip="Stone Colors">
@@ -776,10 +813,10 @@
                                     <span>Stone Colors</span>
                                 </a>
                             </li>
-                        </ul>
-                    </div>
+                        @endif
+                    </ul>
                 </div>
-            @endif
+            </div>
         </div>
 
         <!-- Logout -->
@@ -805,7 +842,7 @@
             </div>
         @endif
 
-        @if ($errors->any())
+        <!-- @if ($errors->any())
             <div class="alert alert-danger">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i>
                 <strong>Error:</strong>
@@ -815,7 +852,7 @@
                     @endforeach
                 </ul>
             </div>
-        @endif
+        @endif -->
 
         @yield('content')
     </main>

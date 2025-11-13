@@ -518,11 +518,11 @@
                 function loadOrderForm(type) {
                     // Show loading state
                     formContainer.innerHTML = `
-                        <div class="loading-state">
-                            <div class="loading-spinner"></div>
-                            <p class="loading-text">Loading order form...</p>
-                        </div>
-                    `;
+                                        <div class="loading-state">
+                                            <div class="loading-spinner"></div>
+                                            <p class="loading-text">Loading order form...</p>
+                                        </div>
+                                    `;
 
                     // Fetch form
                     fetch(`/admin/orders/form/${type}`)
@@ -532,6 +532,30 @@
                         })
                         .then(html => {
                             formContainer.innerHTML = html;
+
+                            // Execute any scripts included in the returned partial so
+                            // event listeners (file previews, drag/drop handlers) run.
+                            // When inserting HTML via innerHTML, <script> tags are not
+                            // executed by default, so we find them and append to body.
+                            try {
+                                const temp = document.createElement('div');
+                                temp.innerHTML = html;
+                                const scripts = temp.querySelectorAll('script');
+                                scripts.forEach(s => {
+                                    const newScript = document.createElement('script');
+                                    if (s.src) {
+                                        newScript.src = s.src;
+                                        // preserve execution order
+                                        newScript.async = false;
+                                    } else {
+                                        newScript.textContent = s.innerHTML;
+                                    }
+                                    document.body.appendChild(newScript);
+                                });
+                            } catch (e) {
+                                // If script parsing fails, log for debugging but don't break UX
+                                console.error('Error evaluating returned scripts:', e);
+                            }
                             submitButton.style.display = 'flex';
 
                             // Smooth scroll to form
@@ -547,16 +571,16 @@
                         .catch(error => {
                             console.error('Error loading form:', error);
                             formContainer.innerHTML = `
-                                <div class="alert-card danger">
-                                    <div class="alert-icon">
-                                        <i class="bi bi-exclamation-triangle-fill"></i>
-                                    </div>
-                                    <div class="alert-content">
-                                        <h5 class="alert-title">Error Loading Form</h5>
-                                        <p class="mb-0">Unable to load the order form. Please try again or contact support if the problem persists.</p>
-                                    </div>
-                                </div>
-                            `;
+                                                <div class="alert-card danger">
+                                                    <div class="alert-icon">
+                                                        <i class="bi bi-exclamation-triangle-fill"></i>
+                                                    </div>
+                                                    <div class="alert-content">
+                                                        <h5 class="alert-title">Error Loading Form</h5>
+                                                        <p class="mb-0">Unable to load the order form. Please try again or contact support if the problem persists.</p>
+                                                    </div>
+                                                </div>
+                                            `;
                             submitButton.style.display = 'none';
                             showToastNotification('Failed to load order form', 'error');
                         });

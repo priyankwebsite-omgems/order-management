@@ -9,9 +9,6 @@ class PermissionController extends Controller
 {
     public function __construct()
     {
-
-        
-
         // ensure admin is authenticated first
         $this->middleware('admin.auth');
 
@@ -80,6 +77,7 @@ class PermissionController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:permissions,slug',
+            'category' => 'required|string|max:255',
             'description' => 'nullable|string',
         ]);
 
@@ -103,6 +101,7 @@ class PermissionController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:permissions,slug,' . $permission->id,
+            'category' => 'required|string|max:255',
             'description' => 'nullable|string',
         ]);
 

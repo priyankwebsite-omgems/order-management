@@ -23,7 +23,7 @@
                 <h5 class="section-title mb-3">
                     <i class="bi bi-folder2-open"></i> Currently Uploaded Files
                 </h5>
-                
+
                 <div class="row">
                     <!-- Current Images -->
                     @if($order->images)
@@ -36,7 +36,8 @@
                                 <div class="current-images-grid">
                                     @foreach(json_decode($order->images, true) ?? [] as $index => $image)
                                         <div class="current-image-item">
-                                            <img src="{{ asset($image) }}" alt="Image {{ $index + 1 }}" onclick="openImageModal(this.src)">
+                                            <img src="{{ asset($image) }}" alt="Image {{ $index + 1 }}"
+                                                onclick="openImageModal(this.src)">
                                             <div class="image-overlay">
                                                 <i class="bi bi-zoom-in"></i>
                                             </div>
@@ -473,7 +474,7 @@
                 grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
             }
 
-            .row > div {
+            .row>div {
                 margin-bottom: 1rem;
             }
         }
@@ -512,7 +513,7 @@
                 imageInputs.forEach(input => {
                     if (!input.dataset.previewInitialized) {
                         input.dataset.previewInitialized = 'true';
-                        input.addEventListener('change', function(e) {
+                        input.addEventListener('change', function (e) {
                             handleImagePreview(e.target);
                         });
                     }
@@ -523,7 +524,7 @@
                 pdfInputs.forEach(input => {
                     if (!input.dataset.previewInitialized) {
                         input.dataset.previewInitialized = 'true';
-                        input.addEventListener('change', function(e) {
+                        input.addEventListener('change', function (e) {
                             handlePDFPreview(e.target);
                         });
                     }
@@ -542,25 +543,25 @@
                 }
 
                 previewContainer.innerHTML = `
-                    <div class="preview-header">
-                        <i class="bi bi-images"></i>
-                        <span>Selected Images (${files.length})</span>
-                    </div>
-                    <div class="preview-grid" id="imagePreviewGrid"></div>
-                `;
+                        <div class="preview-header">
+                            <i class="bi bi-images"></i>
+                            <span>Selected Images (${files.length})</span>
+                        </div>
+                        <div class="preview-grid" id="imagePreviewGrid"></div>
+                    `;
                 previewContainer.classList.add('active');
 
                 const grid = previewContainer.querySelector('#imagePreviewGrid');
 
                 files.forEach((file, index) => {
                     const reader = new FileReader();
-                    reader.onload = function(e) {
+                    reader.onload = function (e) {
                         const previewItem = document.createElement('div');
                         previewItem.className = 'preview-item';
                         previewItem.innerHTML = `
-                            <img src="${e.target.result}" alt="${file.name}">
-                            <div class="file-name">${file.name}</div>
-                        `;
+                                <img src="${e.target.result}" alt="${file.name}">
+                                <div class="file-name">${file.name}</div>
+                            `;
                         grid.appendChild(previewItem);
                     };
                     reader.readAsDataURL(file);
@@ -579,12 +580,12 @@
                 }
 
                 previewContainer.innerHTML = `
-                    <div class="preview-header">
-                        <i class="bi bi-file-pdf"></i>
-                        <span>Selected PDFs (${files.length})</span>
-                    </div>
-                    <div id="pdfPreviewList"></div>
-                `;
+                        <div class="preview-header">
+                            <i class="bi bi-file-pdf"></i>
+                            <span>Selected PDFs (${files.length})</span>
+                        </div>
+                        <div id="pdfPreviewList"></div>
+                    `;
                 previewContainer.classList.add('active');
 
                 const list = previewContainer.querySelector('#pdfPreviewList');
@@ -594,14 +595,14 @@
                     previewItem.className = 'pdf-preview-item';
                     const fileSize = (file.size / 1024).toFixed(2);
                     previewItem.innerHTML = `
-                        <div class="pdf-preview-icon">
-                            <i class="bi bi-file-pdf-fill"></i>
-                        </div>
-                        <div class="pdf-preview-info">
-                            <div class="pdf-preview-name">${file.name}</div>
-                            <div class="pdf-preview-size">${fileSize} KB</div>
-                        </div>
-                    `;
+                            <div class="pdf-preview-icon">
+                                <i class="bi bi-file-pdf-fill"></i>
+                            </div>
+                            <div class="pdf-preview-info">
+                                <div class="pdf-preview-name">${file.name}</div>
+                                <div class="pdf-preview-size">${fileSize} KB</div>
+                            </div>
+                        `;
                     list.appendChild(previewItem);
                 });
             }

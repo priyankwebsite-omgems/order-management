@@ -13,8 +13,8 @@ class Permission extends Model
     protected $fillable = [
         'name',
         'slug',
-        'description',
         'category',
+        'description',
     ];
 
     protected static function boot()

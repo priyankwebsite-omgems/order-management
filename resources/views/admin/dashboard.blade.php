@@ -80,25 +80,39 @@
                 <div>
                     <h2 class="welcome-title">Welcome to the Admin Dashboard</h2>
                     <p class="welcome-text">
-                        You have full access to manage the system. Use the navigation menu to explore different sections.
+                        You can only access the modules assigned to you.
                     </p>
-                    @if (session('redirected'))
+
+                    @if (session('error'))
                         <div class="warning-message">
                             <i class="bi bi-exclamation-triangle"></i>
+                            <span><strong>Access Denied:</strong> {!! session('error') !!}</span><br />
                             <span>You were redirected here because your permissions may have changed or been revoked.</span>
                         </div>
                     @endif
+
                 </div>
             </div>
             <div class="welcome-actions">
-                <a href="{{ route('admins.index') }}" class="btn-primary-modern">
-                    <i class="bi bi-people"></i>
-                    Manage Admins
-                </a>
-                <a href="{{ route('permissions.index') }}" class="btn-secondary-modern">
-                    <i class="bi bi-shield-lock"></i>
-                    View Permissions
-                </a>
+                @if (
+                        auth()->guard('admin')->user() && auth()->guard('admin')
+                            ->user()->canAccessAny(['admins.view', 'admins.create'])
+                    )
+                    <a href="{{ route('admins.index') }}" class="btn-primary-modern">
+                        <i class="bi bi-people"></i>
+                        Manage Admins
+                    </a>
+                @endif
+
+                @if (
+                        auth()->guard('admin')->user() && auth()->guard('admin')
+                            ->user()->canAccessAny(['permissions.view', 'permissions.create'])
+                    )
+                    <a href="{{ route('permissions.index') }}" class="btn-secondary-modern">
+                        <i class="bi bi-shield-lock"></i>
+                        View Permissions
+                    </a>
+                @endif
             </div>
         </div>
 
@@ -109,91 +123,112 @@
         </div>
 
         <div class="quick-links-grid">
-            <a href="{{ route('admins.create') }}" class="quick-link-card">
-                <div class="quick-link-icon icon-primary">
-                    <i class="bi bi-person-plus"></i>
-                </div>
-                <div class="quick-link-content">
-                    <h4 class="quick-link-title">Add New Admin</h4>
-                    <p class="quick-link-description">Create a new administrator account</p>
-                </div>
-                <i class="bi bi-arrow-right quick-link-arrow"></i>
-            </a>
 
-            <a href="{{ route('permissions.create') }}" class="quick-link-card">
-                <div class="quick-link-icon icon-success">
-                    <i class="bi bi-shield-plus"></i>
-                </div>
-                <div class="quick-link-content">
-                    <h4 class="quick-link-title">Create Permission</h4>
-                    <p class="quick-link-description">Define new system permissions</p>
-                </div>
-                <i class="bi bi-arrow-right quick-link-arrow"></i>
-            </a>
+            @if (
+                    auth()->guard('admin')->user() && auth()->guard('admin')
+                        ->user()->canAccessAny(['admins.view', 'admins.create'])
+                )
+                <a href="{{ route('admins.create') }}" class="quick-link-card">
+                    <div class="quick-link-icon icon-primary">
+                        <i class="bi bi-person-plus"></i>
+                    </div>
+                    <div class="quick-link-content">
+                        <h4 class="quick-link-title">Add New Admin</h4>
+                        <p class="quick-link-description">Create a new administrator account</p>
+                    </div>
+                    <i class="bi bi-arrow-right quick-link-arrow"></i>
+                </a>
+            @endif
 
-            <a href="{{ route('orders.index') }}" class="quick-link-card">
-                <div class="quick-link-icon icon-warning">
-                    <i class="bi bi-basket"></i>
-                </div>
-                <div class="quick-link-content">
-                    <h4 class="quick-link-title">View Orders</h4>
-                    <p class="quick-link-description">Manage customer orders</p>
-                </div>
-                <i class="bi bi-arrow-right quick-link-arrow"></i>
-            </a>
+            @if (
+                    auth()->guard('admin')->user() && auth()->guard('admin')
+                        ->user()->canAccessAny(['permissions.view', 'permissions.create'])
+                )
+                <a href="{{ route('permissions.create') }}" class="quick-link-card">
+                    <div class="quick-link-icon icon-success">
+                        <i class="bi bi-shield-plus"></i>
+                    </div>
+                    <div class="quick-link-content">
+                        <h4 class="quick-link-title">Create Permission</h4>
+                        <p class="quick-link-description">Define new system permissions</p>
+                    </div>
+                    <i class="bi bi-arrow-right quick-link-arrow"></i>
+                </a>
+            @endif
 
-            <a href="{{ route('chat.index') }}" class="quick-link-card">
-                <div class="quick-link-icon icon-info">
-                    <i class="bi bi-chat-dots"></i>
-                </div>
-                <div class="quick-link-content">
-                    <h4 class="quick-link-title">Chat Support</h4>
-                    <p class="quick-link-description">Customer support messages</p>
-                </div>
-                <i class="bi bi-arrow-right quick-link-arrow"></i>
-            </a>
+            @if (
+                    auth()->guard('admin')->user() && auth()->guard('admin')
+                        ->user()->canAccessAny(['orders.view', 'orders.create'])
+                )
+                <a href="{{ route('orders.index') }}" class="quick-link-card">
+                    <div class="quick-link-icon icon-warning">
+                        <i class="bi bi-basket"></i>
+                    </div>
+                    <div class="quick-link-content">
+                        <h4 class="quick-link-title">View Orders</h4>
+                        <p class="quick-link-description">Manage customer orders</p>
+                    </div>
+                    <i class="bi bi-arrow-right quick-link-arrow"></i>
+                </a>
+            @endif
+
+            @if (
+                    auth()->guard('admin')->user() && auth()->guard('admin')
+                        ->user()->canAccessAny(['chat.access'])
+                )
+                <a href="{{ route('chat.index') }}" class="quick-link-card">
+                    <div class="quick-link-icon icon-info">
+                        <i class="bi bi-chat-dots"></i>
+                    </div>
+                    <div class="quick-link-content">
+                        <h4 class="quick-link-title">Chat Support</h4>
+                        <p class="quick-link-description">Customer support messages</p>
+                    </div>
+                    <i class="bi bi-arrow-right quick-link-arrow"></i>
+                </a>
+            @endif
         </div>
 
         <!-- Activity Feed (Optional) -->
-        <div class="section-header mt-5">
-            <h3 class="section-title">Recent Activity</h3>
-            <p class="section-subtitle">Latest system events</p>
-        </div>
+        <!-- <div class="section-header mt-5">
+                                                                    <h3 class="section-title">Recent Activity</h3>
+                                                                    <p class="section-subtitle">Latest system events</p>
+                                                                </div>
 
-        <div class="activity-card">
-            <div class="activity-item">
-                <div class="activity-icon activity-success">
-                    <i class="bi bi-person-check"></i>
-                </div>
-                <div class="activity-content">
-                    <p class="activity-title">New admin added</p>
-                    <p class="activity-description">John Doe was added to the system</p>
-                </div>
-                <span class="activity-time">2 hours ago</span>
-            </div>
+                                                                <div class="activity-card">
+                                                                    <div class="activity-item">
+                                                                        <div class="activity-icon activity-success">
+                                                                            <i class="bi bi-person-check"></i>
+                                                                        </div>
+                                                                        <div class="activity-content">
+                                                                            <p class="activity-title">New admin added</p>
+                                                                            <p class="activity-description">John Doe was added to the system</p>
+                                                                        </div>
+                                                                        <span class="activity-time">2 hours ago</span>
+                                                                    </div>
 
-            <div class="activity-item">
-                <div class="activity-icon activity-primary">
-                    <i class="bi bi-shield-check"></i>
-                </div>
-                <div class="activity-content">
-                    <p class="activity-title">Permissions updated</p>
-                    <p class="activity-description">Admin permissions were modified</p>
-                </div>
-                <span class="activity-time">5 hours ago</span>
-            </div>
+                                                                    <div class="activity-item">
+                                                                        <div class="activity-icon activity-primary">
+                                                                            <i class="bi bi-shield-check"></i>
+                                                                        </div>
+                                                                        <div class="activity-content">
+                                                                            <p class="activity-title">Permissions updated</p>
+                                                                            <p class="activity-description">Admin permissions were modified</p>
+                                                                        </div>
+                                                                        <span class="activity-time">5 hours ago</span>
+                                                                    </div>
 
-            <div class="activity-item">
-                <div class="activity-icon activity-warning">
-                    <i class="bi bi-basket"></i>
-                </div>
-                <div class="activity-content">
-                    <p class="activity-title">New order received</p>
-                    <p class="activity-description">Order #1234 needs processing</p>
-                </div>
-                <span class="activity-time">1 day ago</span>
-            </div>
-        </div>
+                                                                    <div class="activity-item">
+                                                                        <div class="activity-icon activity-warning">
+                                                                            <i class="bi bi-basket"></i>
+                                                                        </div>
+                                                                        <div class="activity-content">
+                                                                            <p class="activity-title">New order received</p>
+                                                                            <p class="activity-description">Order #1234 needs processing</p>
+                                                                        </div>
+                                                                        <span class="activity-time">1 day ago</span>
+                                                                    </div>
+                                                                </div> -->
     </div>
 
     <style>

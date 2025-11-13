@@ -141,7 +141,7 @@
                                     <i class="bi bi-flag me-2"></i>Country Code
                                 </label>
                                 <input type="text" name="country_code" class="form-control-modern"
-                                    value="{{ old('country_code') }}" placeholder="+91">
+                                    value="+91" placeholder="+91" readonly style="background-color: #f1f5f9;" disabled>
                             </div>
                         </div>
                         <div class="col-md-3">

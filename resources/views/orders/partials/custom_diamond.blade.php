@@ -1,291 +1,304 @@
-<!-- Order Details Section -->
-<div class="form-section-card mb-4">
-    <div class="section-header">
-        <div class="section-icon" style="background: linear-gradient(135deg, #ec4899, #be185d);">
-            <i class="bi bi-file-text-fill"></i>
-        </div>
-        <div class="section-header-text">
-            <h5 class="section-title">Order Details</h5>
-            <p class="section-description">Enter customer and diamond specifications</p>
-        </div>
-    </div>
-    <div class="section-body">
-        <div class="form-group-modern">
-            <label class="form-label-modern">
-                <span class="label-icon" style="color: #ec4899;">
-                    <i class="bi bi-person-lines-fill"></i>
-                </span>
-                <span class="label-text">Customer Details</span>
-                <span class="required-badge">Required</span>
-            </label>
-            <textarea name="client_details" class="form-control-modern" rows="4"
-                placeholder="Enter customer name, contact details, and requirements..."
-                required>{{ old('client_details', $order->client_details ?? '') }}</textarea>
-            <div class="form-hint">
-                <i class="bi bi-info-circle"></i>
-                Include customer name, phone, email, and any special requests
+<form action="{{ route('orders.store') }}" method="POST" enctype="multipart/form-data">
+    @csrf
+
+    <!-- Order Details Section -->
+    <div class="form-section-card mb-4">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="bi bi-file-text-fill"></i>
+            </div>
+            <div class="section-header-text">
+                <h5 class="section-title">Order Details</h5>
+                <p class="section-description">Enter customer and diamond specifications</p>
             </div>
         </div>
+        <div class="section-body">
+            <div class="form-group-modern">
+                <label class="form-label-modern">
+                    <span class="label-icon">
+                        <i class="bi bi-person-lines-fill"></i>
+                    </span>
+                    <span class="label-text">Customer Details</span>
+                    <span class="required-badge">Required</span>
+                </label>
+                <textarea name="client_details" class="form-control-modern" rows="4"
+                    placeholder="Enter customer name, contact details, and requirements..."
+                    required>{{ old('client_details', $order->client_details ?? '') }}</textarea>
+                <div class="form-hint">
+                    <i class="bi bi-info-circle"></i>
+                    Include customer name, phone, email, and any special requests
+                </div>
+            </div>
 
-        <div class="form-group-modern">
-            <label class="form-label-modern">
-                <span class="label-icon" style="color: #ec4899;">
-                    <i class="bi bi-stars"></i>
-                </span>
-                <span class="label-text">Diamond Details</span>
-                <span class="required-badge">Required</span>
-            </label>
-            <textarea name="diamond_details" class="form-control-modern" rows="5"
-                placeholder="Enter diamond specifications: carat weight, cut grade, clarity, color, shape, measurements..."
-                required>{{ old('diamond_details', $order->diamond_details ?? '') }}</textarea>
-            <div class="form-hint">
-                <i class="bi bi-info-circle"></i>
-                Include complete diamond specifications: 4Cs (carat, cut, clarity, color), shape, dimensions, and
-                certification details
+            <div class="form-group-modern">
+                <label class="form-label-modern">
+                    <span class="label-icon">
+                        <i class="bi bi-stars"></i>
+                    </span>
+                    <span class="label-text">Diamond Details</span>
+                    <span class="required-badge">Required</span>
+                </label>
+                <textarea name="diamond_details" class="form-control-modern" rows="5"
+                    placeholder="Enter diamond specifications: carat weight, cut grade, clarity, color, shape, measurements..."
+                    required>{{ old('diamond_details', $order->diamond_details ?? '') }}</textarea>
+                <div class="form-hint">
+                    <i class="bi bi-info-circle"></i>
+                    Include complete diamond specifications: 4Cs (carat, cut, clarity, color), shape, dimensions, and
+                    certification details
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Business Details Section -->
-<div class="form-section-card mb-4">
-    <div class="section-header">
-        <div class="section-icon" style="background: linear-gradient(135deg, #ec4899, #be185d);">
-            <i class="bi bi-building"></i>
+    <!-- Business Details Section -->
+    <div class="form-section-card mb-4">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="bi bi-building"></i>
+            </div>
+            <div class="section-header-text">
+                <h5 class="section-title">Business Details</h5>
+                <p class="section-description">Company, status, and pricing information</p>
+            </div>
         </div>
-        <div class="section-header-text">
-            <h5 class="section-title">Business Details</h5>
-            <p class="section-description">Company, status, and pricing information</p>
-        </div>
-    </div>
-    <div class="section-body">
-        <div class="row g-3">
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <span class="label-icon" style="color: #ec4899;">
-                            <i class="bi bi-briefcase"></i>
-                        </span>
-                        <span class="label-text">Company</span>
-                        <span class="optional-badge">Optional</span>
-                    </label>
-                    <select name="company_id" class="form-control-modern">
-                        <option value="">-- Select Company --</option>
-                        @foreach(App\Models\Company::all() as $company)
-                            <option value="{{ $company->id }}" {{ old('company_id', $order->company_id ?? '') == $company->id ? 'selected' : '' }}>
-                                {{ $company->name }}
+        <div class="section-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">
+                            <span class="label-icon">
+                                <i class="bi bi-briefcase"></i>
+                            </span>
+                            <span class="label-text">Company</span>
+                            <span class="optional-badge">Optional</span>
+                        </label>
+                        <select name="company_id" class="form-control-modern">
+                            <option value="">-- Select Company --</option>
+                            @foreach($companies as $company)
+                                <option value="{{ $company->id }}" {{ old('company_id', $order->company_id ?? '') == $company->id ? 'selected' : '' }}>
+                                    {{ $company->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">
+                            <span class="label-icon">
+                                <i class="bi bi-check-circle"></i>
+                            </span>
+                            <span class="label-text">Diamond Status</span>
+                            <span class="required-badge">Required</span>
+                        </label>
+                        <select name="diamond_status" class="form-control-modern" required>
+                            <option value="">-- Select Status --</option>
+                            <option value="diamond_purchased" {{ old('diamond_status', $order->diamond_status ?? '') == 'diamond_purchased' ? 'selected' : '' }}>
+                                Diamond Purchased
                             </option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <span class="label-icon" style="color: #ec4899;">
-                            <i class="bi bi-check-circle"></i>
-                        </span>
-                        <span class="label-text">Diamond Status</span>
-                        <span class="required-badge">Required</span>
-                    </label>
-                    <select name="diamond_status" class="form-control-modern" required>
-                        <option value="">-- Select Status --</option>
-                        <option value="diamond_purchased" {{ old('diamond_status', $order->diamond_status ?? '') == 'diamond_purchased' ? 'selected' : '' }}>
-                            Diamond Purchased
-                        </option>
-                        <option value="factory_making" {{ old('diamond_status', $order->diamond_status ?? '') == 'factory_making' ? 'selected' : '' }}>
-                            Factory Making
-                        </option>
-                        <option value="diamond_completed" {{ old('diamond_status', $order->diamond_status ?? '') == 'diamond_completed' ? 'selected' : '' }}>
-                            Diamond Completed
-                        </option>
-                    </select>
-                    <div class="form-hint">
-                        <i class="bi bi-info-circle"></i>
-                        Current processing stage of the diamond order
+                            <option value="factory_making" {{ old('diamond_status', $order->diamond_status ?? '') == 'factory_making' ? 'selected' : '' }}>
+                                Factory Making
+                            </option>
+                            <option value="diamond_completed" {{ old('diamond_status', $order->diamond_status ?? '') == 'diamond_completed' ? 'selected' : '' }}>
+                                Diamond Completed
+                            </option>
+                        </select>
+                        <div class="form-hint">
+                            <i class="bi bi-info-circle"></i>
+                            Current processing stage of the diamond order
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <span class="label-icon" style="color: #ec4899;">
-                            <i class="bi bi-currency-rupee"></i>
-                        </span>
-                        <span class="label-text">Gross Sell Amount</span>
-                        <span class="optional-badge">Optional</span>
-                    </label>
-                    <input type="number" step="0.01" name="gross_sell" class="form-control-modern" placeholder="0.00"
-                        value="{{ old('gross_sell', $order->gross_sell ?? '') }}">
-                    <div class="form-hint">
-                        <i class="bi bi-info-circle"></i>
-                        Enter the total selling price in rupees
+                <div class="col-md-6">
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">
+                            <span class="label-icon">
+                                <i class="bi bi-currency-rupee"></i>
+                            </span>
+                            <span class="label-text">Gross Sell Amount</span>
+                            <span class="optional-badge">Optional</span>
+                        </label>
+                        <input type="number" step="0.01" name="gross_sell" class="form-control-modern"
+                            placeholder="0.00" value="{{ old('gross_sell', $order->gross_sell ?? '') }}">
+                        <div class="form-hint">
+                            <i class="bi bi-info-circle"></i>
+                            Enter the total selling price in rupees
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <span class="label-icon" style="color: #ec4899;">
-                            <i class="bi bi-chat-left-text"></i>
-                        </span>
-                        <span class="label-text">Additional Notes</span>
-                        <span class="optional-badge">Optional</span>
-                    </label>
-                    <textarea name="note" class="form-control-modern" rows="3"
-                        placeholder="Enter any additional notes or comments...">{{ old('note', $order->note ?? '') }}</textarea>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Media Upload Section -->
-<div class="form-section-card mb-4">
-    <div class="section-header">
-        <div class="section-icon" style="background: linear-gradient(135deg, #ec4899, #be185d);">
-            <i class="bi bi-images"></i>
-        </div>
-        <div class="section-header-text">
-            <h5 class="section-title">Media & Documents</h5>
-            <p class="section-description">Upload diamond images and certificates</p>
-        </div>
-    </div>
-    <div class="section-body">
-        <div class="file-upload-wrapper">
-            <label class="form-label-modern">
-                <span class="label-icon" style="color: #ec4899;">
-                    <i class="bi bi-card-image"></i>
-                </span>
-                <span class="label-text">Diamond Images</span>
-                <span class="optional-badge">Optional</span>
-                <span class="badge-info">Max 10 images</span>
-            </label>
-            <input type="file" name="images[]" id="diamond_images" class="file-input-hidden" accept="image/*" multiple>
-            <label for="diamond_images" class="file-upload-area">
-                <div class="file-upload-content">
-                    <div class="file-upload-icon diamond">
-                        <i class="bi bi-cloud-upload"></i>
-                    </div>
-                    <div class="file-upload-text">
-                        <span class="upload-title">Click to upload images</span>
-                        <span class="upload-subtitle">or drag and drop</span>
-                    </div>
-                    <div class="upload-formats">JPG, PNG, GIF up to 10MB each</div>
-                </div>
-            </label>
-            <div class="file-preview-grid" id="preview_diamond_images"></div>
-        </div>
-
-        <div class="file-upload-wrapper">
-            <label class="form-label-modern">
-                <span class="label-icon" style="color: #ec4899;">
-                    <i class="bi bi-file-pdf"></i>
-                </span>
-                <span class="label-text">PDF Documents</span>
-                <span class="optional-badge">Optional</span>
-                <span class="badge-info">Max 5 PDFs</span>
-            </label>
-            <input type="file" name="order_pdfs[]" id="order_pdfs" class="file-input-hidden" accept="application/pdf"
-                multiple>
-            <label for="order_pdfs" class="file-upload-area">
-                <div class="file-upload-content">
-                    <div class="file-upload-icon pdf">
-                        <i class="bi bi-file-earmark-arrow-up"></i>
-                    </div>
-                    <div class="file-upload-text">
-                        <span class="upload-title">Click to upload PDFs</span>
-                        <span class="upload-subtitle">or drag and drop</span>
-                    </div>
-                    <div class="upload-formats">PDF files up to 10MB each (compress if larger)</div>
-                </div>
-            </label>
-            <div class="file-preview-list" id="preview_order_pdfs"></div>
-        </div>
-    </div>
-</div>
-
-<!-- Shipping Details Section -->
-<div class="form-section-card mb-4">
-    <div class="section-header">
-        <div class="section-icon" style="background: linear-gradient(135deg, #ec4899, #be185d);">
-            <i class="bi bi-truck"></i>
-        </div>
-        <div class="section-header-text">
-            <h5 class="section-title">Shipping Information</h5>
-            <p class="section-description">Delivery and tracking details</p>
-        </div>
-    </div>
-    <div class="section-body">
-        <div class="row g-3">
-            <div class="col-md-4">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <span class="label-icon" style="color: #ec4899;">
-                            <i class="bi bi-building"></i>
-                        </span>
-                        <span class="label-text">Shipping Company</span>
-                        <span class="optional-badge">Optional</span>
-                    </label>
-                    <input type="text" name="shipping_company_name" class="form-control-modern"
-                        placeholder="e.g., FedEx, DHL, Blue Dart"
-                        value="{{ old('shipping_company_name', $order->shipping_company_name ?? '') }}">
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <span class="label-icon" style="color: #ec4899;">
-                            <i class="bi bi-hash"></i>
-                        </span>
-                        <span class="label-text">Tracking Number</span>
-                        <span class="optional-badge">Optional</span>
-                    </label>
-                    <input type="text" name="tracking_number" class="form-control-modern"
-                        placeholder="Enter tracking number"
-                        value="{{ old('tracking_number', $order->tracking_number ?? '') }}">
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <span class="label-icon" style="color: #ec4899;">
-                            <i class="bi bi-calendar-event"></i>
-                        </span>
-                        <span class="label-text">Dispatch Date</span>
-                        <span class="optional-badge">Optional</span>
-                    </label>
-                    <input type="date" name="dispatch_date" class="form-control-modern"
-                        value="{{ old('dispatch_date', $order->dispatch_date ?? '') }}">
-                </div>
-            </div>
-
-            <div class="col-12">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <span class="label-icon" style="color: #ec4899;">
-                            <i class="bi bi-link-45deg"></i>
-                        </span>
-                        <span class="label-text">Tracking URL</span>
-                        <span class="optional-badge">Optional</span>
-                    </label>
-                    <input type="url" name="tracking_url" class="form-control-modern"
-                        placeholder="https://tracking.example.com/track?id=..."
-                        value="{{ old('tracking_url', $order->tracking_url ?? '') }}">
-                    <div class="form-hint">
-                        <i class="bi bi-info-circle"></i>
-                        Full URL for tracking shipment online
+                <div class="col-md-6">
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">
+                            <span class="label-icon">
+                                <i class="bi bi-chat-left-text"></i>
+                            </span>
+                            <span class="label-text">Priority Note</span>
+                            <span class="required-badge">Required</span>
+                        </label>
+                        <select name="note" class="form-control-modern" required>
+                            <option value="">-- Select Status --</option>
+                            <option value="priority" {{ old('note', $order->note ?? '') == 'priority' ? 'selected' : '' }}>
+                                Priority
+                            </option>
+                            <option value="non_priority" {{ old('note', $order->note ?? '') == 'non_priority' ? 'selected' : '' }}>
+                                Non Priority
+                            </option>
+                        </select>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- Media Upload Section -->
+    <div class="form-section-card mb-4">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="bi bi-images"></i>
+            </div>
+            <div class="section-header-text">
+                <h5 class="section-title">Media & Documents</h5>
+                <p class="section-description">Upload diamond images and certificates</p>
+            </div>
+        </div>
+        <div class="section-body">
+            <div class="file-upload-wrapper">
+                <label class="form-label-modern">
+                    <span class="label-icon">
+                        <i class="bi bi-card-image"></i>
+                    </span>
+                    <span class="label-text">Diamond Images</span>
+                    <span class="required-badge">Required</span>
+                    <span class="badge-info">Max 10 images</span>
+                </label>
+                <input type="file" name="images[]" id="diamond_images" class="file-input-hidden" accept="image/*"
+                    multiple required>
+                <label for="diamond_images" class="file-upload-area diamond">
+                    <div class="file-upload-content">
+                        <div class="file-upload-icon diamond">
+                            <i class="bi bi-cloud-upload"></i>
+                        </div>
+                        <div class="file-upload-text">
+                            <span class="upload-title">Click to upload images</span>
+                            <span class="upload-subtitle">or drag and drop</span>
+                        </div>
+                        <div class="upload-formats">JPG, PNG, GIF up to 10MB each</div>
+                    </div>
+                </label>
+                <div class="file-preview-grid" id="preview_diamond_images"></div>
+            </div>
+
+            <div class="file-upload-wrapper">
+                <label class="form-label-modern">
+                    <span class="label-icon">
+                        <i class="bi bi-file-pdf"></i>
+                    </span>
+                    <span class="label-text">PDF Documents</span>
+                    <span class="required-badge">Required</span>
+                    <span class="badge-info">Max 5 PDFs</span>
+                </label>
+                <input type="file" name="order_pdfs[]" id="order_pdfs" class="file-input-hidden"
+                    accept="application/pdf" required multiple>
+                <label for="order_pdfs" class="file-upload-area pdf">
+                    <div class="file-upload-content">
+                        <div class="file-upload-icon pdf">
+                            <i class="bi bi-file-earmark-arrow-up"></i>
+                        </div>
+                        <div class="file-upload-text">
+                            <span class="upload-title">Click to upload PDFs</span>
+                            <span class="upload-subtitle">or drag and drop</span>
+                        </div>
+                        <div class="upload-formats">PDF files up to 10MB each (compress if larger)</div>
+                    </div>
+                </label>
+                <div class="file-preview-list" id="preview_order_pdfs"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shipping Details Section -->
+    <div class="form-section-card mb-4">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="bi bi-truck"></i>
+            </div>
+            <div class="section-header-text">
+                <h5 class="section-title">Shipping Information</h5>
+                <p class="section-description">Delivery and tracking details</p>
+            </div>
+        </div>
+        <div class="section-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">
+                            <span class="label-icon">
+                                <i class="bi bi-building"></i>
+                            </span>
+                            <span class="label-text">Shipping Company</span>
+                            <span class="optional-badge">Optional</span>
+                        </label>
+                        <input type="text" name="shipping_company_name" class="form-control-modern"
+                            placeholder="e.g., FedEx, DHL, Blue Dart"
+                            value="{{ old('shipping_company_name', $order->shipping_company_name ?? '') }}">
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">
+                            <span class="label-icon">
+                                <i class="bi bi-hash"></i>
+                            </span>
+                            <span class="label-text">Tracking Number</span>
+                            <span class="optional-badge">Optional</span>
+                        </label>
+                        <input type="text" name="tracking_number" class="form-control-modern"
+                            placeholder="Enter tracking number"
+                            value="{{ old('tracking_number', $order->tracking_number ?? '') }}">
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">
+                            <span class="label-icon">
+                                <i class="bi bi-calendar-event"></i>
+                            </span>
+                            <span class="label-text">Dispatch Date</span>
+                            <span class="required-badge">Required</span>
+                        </label>
+                        <input type="date" name="dispatch_date" class="form-control-modern" required
+                            value="{{ old('dispatch_date', $order->dispatch_date ?? '') }}">
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">
+                            <span class="label-icon">
+                                <i class="bi bi-link-45deg"></i>
+                            </span>
+                            <span class="label-text">Tracking URL</span>
+                            <span class="optional-badge">Optional</span>
+                        </label>
+                        <input type="url" name="tracking_url" class="form-control-modern"
+                            placeholder="https://tracking.example.com/track?id=..."
+                            value="{{ old('tracking_url', $order->tracking_url ?? '') }}">
+                        <div class="form-hint">
+                            <i class="bi bi-info-circle"></i>
+                            Full URL for tracking shipment online
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
 
 <style>
     :root {
@@ -477,7 +490,11 @@
 
     .file-upload-area:hover {
         border-color: var(--primary);
-        background: rgba(236, 72, 153, 0.03);
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    .file-upload-area.pdf:hover {
+        border-color: #EF4444;
     }
 
     .file-upload-content {

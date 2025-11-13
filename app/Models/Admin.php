@@ -105,4 +105,15 @@ class Admin extends Authenticatable
     {
         return $this->belongsToMany(Channel::class, 'channel_user', 'admin_id');
     }
+
+    public function canAccessAny(array $slugs): bool
+    {
+        // Agar Super Admin hai, toh hamesha access de do
+        if ($this->is_super) {
+            return true;
+        }
+
+        // Agar Super Admin nahi hai, toh check karo ki in permissions mein se koi bhi hai ya nahi
+        return $this->hasAnyPermission($slugs);
+    }
 }

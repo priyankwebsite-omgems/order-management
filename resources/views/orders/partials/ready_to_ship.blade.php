@@ -58,74 +58,6 @@
         </div>
     </div>
 
-    <!-- Media Upload Section -->
-    <div class="form-section-card mb-4">
-        <div class="section-header">
-            <div class="section-info">
-                <div class="section-icon">
-                    <i class="bi bi-images"></i>
-                </div>
-                <div>
-                    <h5 class="section-title">Media & Documents</h5>
-                    <p class="section-description">Upload product images and PDF files</p>
-                </div>
-            </div>
-        </div>
-        <div class="section-body">
-            <div class="file-upload-wrapper mb-4">
-                <label class="form-label-modern">
-                    <span class="label-content">
-                        <span class="label-icon"><i class="bi bi-card-image"></i></span>
-                        <span class="label-text">Product Images</span>
-                    </span>
-                    <span class="optional-badge">Optional</span>
-                    <span class="badge-info">Max 10 images</span>
-                </label>
-                <input type="file" name="images[]" id="product_images" class="file-input-hidden" accept="image/*"
-                    multiple>
-                <label for="product_images" class="file-upload-area" id="imageUploadArea">
-                    <div class="file-upload-content">
-                        <div class="file-upload-icon">
-                            <i class="bi bi-cloud-upload"></i>
-                        </div>
-                        <div class="file-upload-text">
-                            <span class="upload-title">Click to upload images</span>
-                            <span class="upload-subtitle">or drag and drop</span>
-                        </div>
-                        <div class="upload-formats">JPG, PNG, GIF up to 10MB each</div>
-                    </div>
-                </label>
-                <div class="file-preview-grid" id="preview_product_images"></div>
-            </div>
-
-            <div class="file-upload-wrapper">
-                <label class="form-label-modern">
-                    <span class="label-content">
-                        <span class="label-icon"><i class="bi bi-file-pdf"></i></span>
-                        <span class="label-text">Order PDFs</span>
-                    </span>
-                    <span class="optional-badge">Optional</span>
-                    <span class="badge-info">Max 5 PDFs</span>
-                </label>
-                <input type="file" name="order_pdfs[]" id="order_pdfs" class="file-input-hidden"
-                    accept="application/pdf" multiple>
-                <label for="order_pdfs" class="file-upload-area pdf" id="pdfUploadArea">
-                    <div class="file-upload-content">
-                        <div class="file-upload-icon pdf">
-                            <i class="bi bi-file-earmark-arrow-up"></i>
-                        </div>
-                        <div class="file-upload-text">
-                            <span class="upload-title">Click to upload PDFs</span>
-                            <span class="upload-subtitle">or drag and drop</span>
-                        </div>
-                        <div class="upload-formats">PDF up to 10MB each (compress if larger)</div>
-                    </div>
-                </label>
-                <div class="file-preview-list" id="preview_order_pdfs"></div>
-            </div>
-        </div>
-    </div>
-
     <!-- Metal, Company & Status -->
     <div class="form-section-card mb-4">
         <div class="section-header">
@@ -145,7 +77,9 @@
                     <div class="form-group-modern">
                         <label class="form-label-modern">
                             <span class="label-content">
-                                <span class="label-icon"><i class="bi bi-circle-fill"></i></span>
+                                <span class="label-icon" style="color: #FFD700;">
+                                    <i class="bi bi-circle-fill"></i>
+                                </span>
                                 <span class="label-text">Gold Detail</span>
                             </span>
                         </label>
@@ -216,6 +150,78 @@
                         </select>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Media Upload Section -->
+    <div class="form-section-card mb-4">
+        <div class="section-header">
+            <div class="section-info">
+                <div class="section-icon">
+                    <i class="bi bi-images"></i>
+                </div>
+                <div>
+                    <h5 class="section-title">Media & Documents</h5>
+                    <p class="section-description">Upload product images and PDF files</p>
+                </div>
+            </div>
+        </div>
+        <div class="section-body">
+            <div class="file-upload-wrapper mb-4">
+                <label class="form-label-modern">
+                    <span class="label-content">
+                        <span class="label-icon"><i class="bi bi-card-image"></i></span>
+                        <span class="label-text">Product Images</span>
+                    </span>
+                    <span style="display:flex; gap:0.5rem; align-items:center;">
+                        <span class="required-badge">Required</span>
+                        <span class="badge-info">Max 10 Images</span>
+                    </span>
+                </label>
+                <input type="file" name="images[]" id="product_images" class="file-input-hidden" accept="image/*"
+                    multiple>
+                <label for="product_images" class="file-upload-area" id="imageUploadArea">
+                    <div class="file-upload-content">
+                        <div class="file-upload-icon diamond">
+                            <i class="bi bi-cloud-upload"></i>
+                        </div>
+                        <div class="file-upload-text">
+                            <span class="upload-title">Click to upload images</span>
+                            <span class="upload-subtitle">or drag and drop</span>
+                        </div>
+                        <div class="upload-formats">JPG, PNG, GIF up to 10MB each</div>
+                    </div>
+                </label>
+                <div class="file-preview-grid" id="preview_product_images"></div>
+            </div>
+
+            <div class="file-upload-wrapper">
+                <label class="form-label-modern">
+                    <span class="label-content">
+                        <span class="label-icon"><i class="bi bi-file-pdf"></i></span>
+                        <span class="label-text">Order PDFs</span>
+                    </span>
+                    <span style="display:flex; gap:0.5rem; align-items:center;">
+                        <span class="required-badge">Required</span>
+                        <span class="badge-info">Max 5 PDFs</span>
+                    </span>
+                </label>
+                <input type="file" name="order_pdfs[]" id="order_pdfs" class="file-input-hidden"
+                    accept="application/pdf" multiple>
+                <label for="order_pdfs" class="file-upload-area pdf" id="pdfUploadArea">
+                    <div class="file-upload-content">
+                        <div class="file-upload-icon pdf">
+                            <i class="bi bi-file-earmark-arrow-up"></i>
+                        </div>
+                        <div class="file-upload-text">
+                            <span class="upload-title">Click to upload PDFs</span>
+                            <span class="upload-subtitle">or drag and drop</span>
+                        </div>
+                        <div class="upload-formats">PDF up to 10MB each (compress if larger)</div>
+                    </div>
+                </label>
+                <div class="file-preview-list" id="preview_order_pdfs"></div>
             </div>
         </div>
     </div>
@@ -392,6 +398,7 @@
     </div>
 </form>
 
+<!-- Custom CSS -->
 <style>
     :root {
         --primary: #6366f1;
@@ -482,14 +489,9 @@
     }
 
     .label-icon {
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
-        color: var(--primary);
         display: flex;
         align-items: center;
-        justify-content: center;
+        color: var(--primary);
         font-size: 1rem;
     }
 
@@ -595,10 +597,6 @@
         transform: scale(1.01);
     }
 
-    .file-upload-area.pdf .file-upload-icon {
-        background: linear-gradient(135deg, #ef4444, #dc2626);
-    }
-
     .file-upload-content {
         text-align: center;
     }
@@ -607,13 +605,27 @@
         width: 64px;
         height: 64px;
         border-radius: 12px;
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-        color: white;
+        background: white;
+        color: var(--primary);
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 2rem;
         margin: 0 auto 1rem;
+        border: 2px solid var(--border);
+    }
+
+    .file-upload-icon.diamond {
+        color: var(--primary);
+    }
+
+    .file-upload-icon.pdf {
+        color: var(--danger);
+        border-color: #EF4444;
+    }
+
+    .file-upload-area.pdf:hover {
+        border-color: #EF4444;
     }
 
     .file-upload-text {
@@ -825,6 +837,7 @@
     }
 </style>
 
+<!-- JavaScript -->
 <script>
     (function () {
         'use strict';
@@ -958,7 +971,6 @@
                 <button type="button" class="preview-remove" onclick="removeImage(${index})">
                     <i class="bi bi-x"></i>
                 </button>
-                <div class="preview-name" title="${file.name}">${file.name}</div>
             `;
 
                 imagePreview.appendChild(previewItem);
@@ -1136,6 +1148,7 @@
     })();
 </script>
 
+<!-- Mobile CSS -->
 <style>
     @keyframes slideIn {
         from {

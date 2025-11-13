@@ -23,7 +23,7 @@ class AdminPermissionController extends Controller
             ->orderBy('name')
             ->get()
             ->groupBy('category');
-        
+
         // Get the IDs of assigned permissions
         $assignedPermissions = $admin->load('permissions')
             ->permissions

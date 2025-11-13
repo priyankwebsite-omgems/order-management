@@ -10,19 +10,42 @@ use App\Models\RingSize;
 use App\Models\SettingType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Carbon\Carbon;
-// use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Log;
+use Cloudinary\Cloudinary;
+use Cloudinary\Api\Upload\UploadApi;
 
 class OrderController extends Controller
 {
+    private $cloudinary;
+
+    public function __construct()
+    {
+        // Initialize Cloudinary with direct configuration
+        $this->cloudinary = new Cloudinary([
+            'cloud' => [
+                'cloud_name' => config('cloudinary.cloud_name'),
+                'api_key' => config('cloudinary.api_key'),
+                'api_secret' => config('cloudinary.api_secret'),
+            ],
+            'url' => [
+                'secure' => true
+            ]
+        ]);
+    }
+
     /**
      * Display a listing of orders with filters.
      */
     public function index(Request $request)
     {
+        $admin = Auth::guard('admin')->user();
+
+        // 2. Start the query
         $query = Order::query()->with(['company', 'creator']);
+
+        if ($admin->id !== 1) {
+            $query->where('submitted_by', $admin->id);
+        }
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -41,6 +64,7 @@ class OrderController extends Controller
         if ($request->filled('diamond_status')) {
             $query->where('diamond_status', $request->diamond_status);
         }
+
         $orders = $query->latest()->paginate(10);
         return view('orders.index', compact('orders'));
     }
@@ -58,22 +82,38 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $this->validateOrder($request);
+        try {
+            $validated = $this->validateOrder($request);
 
-        // ✅ Handle file uploads
-        $images = $this->handleFileUploads($request, 'images', 'uploads/orders/images', 10);
-        $pdfs = $this->handleFileUploads($request, 'order_pdfs', 'uploads/orders/pdfs', 5, true);
+            // Upload files to Cloudinary
+            $images = $this->uploadToCloudinary($request, 'images', 'orders/images', 10);
+            $pdfs = $this->uploadToCloudinary($request, 'order_pdfs', 'orders/pdfs', 5, true);
 
-        // ✅ Create and save the order
-        $order = new Order();
-        $this->assignOrderFields($order, $validated);
-        $order->images = json_encode($images);
-        $order->order_pdfs = json_encode($pdfs);
-        $order->submitted_by = Auth::guard('admin')->id();
+            // Create and save the order
+            $order = new Order();
+            $this->assignOrderFields($order, $validated);
+            $order->images = json_encode($images);
+            $order->order_pdfs = json_encode($pdfs);
+            $order->submitted_by = Auth::guard('admin')->id();
 
-        $order->save();
+            $order->save();
 
-        return redirect()->route('orders.index')->with('success', 'Order created successfully.');
+            Log::info('Order created successfully', [
+                'order_id' => $order->id,
+                'images_count' => count($images),
+                'pdfs_count' => count($pdfs)
+            ]);
+
+            return redirect()->route('orders.index')
+                ->with('success', 'Order created successfully! ' . count($images) . ' images and ' . count($pdfs) . ' PDFs uploaded to Cloudinary.');
+
+        } catch (\Exception $e) {
+            Log::error('Order creation failed: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return back()->withInput()->with('error', 'Failed to create order: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -89,43 +129,60 @@ class OrderController extends Controller
      */
     public function update(Request $request, Order $order)
     {
-        $validated = $this->validateOrder($request);
+        try {
+            $validated = $this->validateOrder($request);
 
-        // ✅ Handle new file uploads
-        $newImages = $this->handleFileUploads($request, 'images', 'uploads/orders/images', 10);
-        $newPdfs = $this->handleFileUploads($request, 'order_pdfs', 'uploads/orders/pdfs', 5, true);
+            // Handle new file uploads to Cloudinary
+            $newImages = $this->uploadToCloudinary($request, 'images', 'orders/images', 10);
+            $newPdfs = $this->uploadToCloudinary($request, 'order_pdfs', 'orders/pdfs', 5, true);
 
-        // ✅ Decode existing JSON data safely
-        $existingImages = json_decode($order->images ?? '[]', true);
-        $existingPdfs = json_decode($order->order_pdfs ?? '[]', true);
+            // Decode existing JSON data safely
+            $existingImages = json_decode($order->images ?? '[]', true) ?: [];
+            $existingPdfs = json_decode($order->order_pdfs ?? '[]', true) ?: [];
 
-        // ✅ Merge old + new files
-        $order->images = json_encode(array_merge($existingImages, $newImages));
-        $order->order_pdfs = json_encode(array_merge($existingPdfs, $newPdfs));
+            // Merge old + new files
+            $order->images = json_encode(array_merge($existingImages, $newImages));
+            $order->order_pdfs = json_encode(array_merge($existingPdfs, $newPdfs));
 
-        // ✅ Update other fields
-        $this->assignOrderFields($order, $validated);
-        $order->submitted_by = Auth::guard('admin')->id();
+            // Update other fields
+            $this->assignOrderFields($order, $validated);
+            $order->submitted_by = Auth::guard('admin')->id();
 
-        $order->save();
+            $order->save();
 
-        return redirect()->route('orders.index')->with('success', 'Order updated successfully.');
+            Log::info('Order updated successfully', [
+                'order_id' => $order->id,
+                'new_images' => count($newImages),
+                'new_pdfs' => count($newPdfs)
+            ]);
+
+            return redirect()->route('orders.index')
+                ->with('success', 'Order updated successfully! Added ' . count($newImages) . ' new images and ' . count($newPdfs) . ' new PDFs.');
+
+        } catch (\Exception $e) {
+            Log::error('Order update failed: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Failed to update order: ' . $e->getMessage());
+        }
     }
 
-
-    /* 
-    * Show the Order details.
-    */
+    /**
+     * Show the Order details.
+     */
     public function show(Order $order)
     {
-        // Fetch related dropdown data if your show.blade.php uses them
+        $admin = Auth::guard('admin')->user();
+
+        // If not super admin AND not the creator, abort
+        if ($admin->id !== 1 && $order->submitted_by !== $admin->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $metalTypes = MetalType::all();
         $ringSizes = RingSize::all();
         $settingTypes = SettingType::all();
         $closureTypes = ClosureType::all();
         $companies = Company::all();
 
-        // Pass data to the show view
         return view('orders.show', compact(
             'order',
             'metalTypes',
@@ -136,43 +193,49 @@ class OrderController extends Controller
         ));
     }
 
-
     /**
-     * Delete an order and its attached files.
+     * Delete an order and its attached files from Cloudinary.
      */
     public function destroy(Order $order)
     {
-        // Delete attached images
-        $images = is_string($order->images) ? json_decode($order->images, true) : ($order->images ?? []);
-        foreach ($images as $image) {
-            Storage::delete(str_replace('storage/', 'public/', $image));
-        }
+        try {
+            // Delete images from Cloudinary
+            $images = is_string($order->images) ? json_decode($order->images, true) : ($order->images ?? []);
+            foreach ($images as $image) {
+                if (isset($image['public_id'])) {
+                    $this->deleteFromCloudinary($image['public_id'], 'image');
+                }
+            }
 
-        // Delete attached PDFs
-        $pdfs = is_string($order->order_pdfs) ? json_decode($order->order_pdfs, true) : ($order->order_pdfs ?? []);
-        foreach ($pdfs as $pdf) {
-            Storage::delete(str_replace('storage/', 'public/', $pdf));
-        }
+            // Delete PDFs from Cloudinary
+            $pdfs = is_string($order->order_pdfs) ? json_decode($order->order_pdfs, true) : ($order->order_pdfs ?? []);
+            foreach ($pdfs as $pdf) {
+                if (isset($pdf['public_id'])) {
+                    $this->deleteFromCloudinary($pdf['public_id'], 'raw');
+                }
+            }
 
-        $order->delete();
-        return redirect()->route('orders.index')->with('success', 'Order deleted successfully.');
+            $order->delete();
+
+            Log::info('Order deleted successfully', ['order_id' => $order->id]);
+
+            return redirect()->route('orders.index')->with('success', 'Order and all associated files deleted successfully from Cloudinary.');
+
+        } catch (\Exception $e) {
+            Log::error('Order deletion failed: ' . $e->getMessage());
+            return back()->with('error', 'Failed to delete order: ' . $e->getMessage());
+        }
     }
 
     /**
      * Validate form input for all order types.
-     */
-    /**
-     * Validate form input for all order types.
-     *
-     * @param Request $request
-     * @return array The validated data
      */
     private function validateOrder(Request $request): array
     {
         $rules = [
             'order_type' => 'required|in:ready_to_ship,custom_diamond,custom_jewellery',
             'client_details' => 'required|string',
-            'diamond_status' => 'nullable|string|in:processed,completed',
+            'diamond_status' => 'nullable|string|in:processed,completed,diamond_purchased,factory_making,diamond_completed',
             'company_id' => 'required|exists:companies,id',
             'gross_sell' => 'nullable|numeric|min:0',
             'dispatch_date' => 'nullable|date',
@@ -180,7 +243,7 @@ class OrderController extends Controller
             'shipping_company_name' => 'nullable|string',
             'tracking_number' => 'nullable|string',
             'tracking_url' => 'nullable|url',
-            'images.*' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+            'images.*' => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:10240',
             'order_pdfs.*' => 'nullable|mimes:pdf|max:10240',
         ];
 
@@ -220,13 +283,6 @@ class OrderController extends Controller
     /**
      * Assign common validated fields to Order model.
      */
-    /**
-     * Assign common validated fields to Order model.
-     *
-     * @param Order $order
-     * @param array $validated
-     * @return void
-     */
     private function assignOrderFields(Order $order, array $validated): void
     {
         $order->order_type = $validated['order_type'];
@@ -248,59 +304,122 @@ class OrderController extends Controller
     }
 
     /**
-     * Handle file uploads (images or PDFs).
+     * Upload files to Cloudinary using direct SDK.
      */
-    /**
-     * Handle file uploads (images or PDFs).
-     *
-     * @return array List of stored file paths
-     */
-    private function handleFileUploads(Request $request, string $field, string $path, int $maxFiles, bool $isPdf = false): array
+    private function uploadToCloudinary(Request $request, string $field, string $folder, int $maxFiles, bool $isPdf = false): array
     {
-        $files = [];
+        $uploadedFiles = [];
 
-        if ($request->hasFile($field)) {
-            foreach ($request->file($field) as $index => $file) {
-                if ($index >= $maxFiles) break;
+        if (!$request->hasFile($field)) {
+            return $uploadedFiles;
+        }
 
-                // ✅ Get original and unique names
-                $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-                $extension = $file->getClientOriginalExtension();
-                $uuidName = Str::uuid() . '.' . $extension;
+        $files = $request->file($field);
 
-                // ✅ Store file
-                $storedPath = $file->storeAs($path, $uuidName, 'public');
+        foreach ($files as $index => $file) {
+            if ($index >= $maxFiles) {
+                Log::warning("Max files limit reached for {$field}");
+                break;
+            }
 
-                // ✅ Compress if it's a large PDF
-                if ($isPdf && $file->getSize() > 10 * 1024 * 1024) {
-                    $this->compressPdf(storage_path('app/public/' . $storedPath));
+            try {
+                // Validate file
+                if (!$file->isValid()) {
+                    Log::error("Invalid file upload: {$file->getClientOriginalName()}");
+                    continue;
                 }
 
-                // ✅ Save both path + original name
-                $files[] = [
-                    'path' => 'storage/' . $storedPath,
-                    'name' => $originalName . '.' . $extension,
+                $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $extension = $file->getClientOriginalExtension();
+                $timestamp = time();
+                $uniqueId = uniqid();
+
+                // Create unique public_id
+                $publicId = "{$folder}/{$timestamp}_{$uniqueId}";
+
+                // Upload options
+                $uploadOptions = [
+                    'public_id' => $publicId,
+                    'folder' => $folder,
                 ];
+
+                Log::info("Uploading to Cloudinary", [
+                    'file' => $file->getClientOriginalName(),
+                    'type' => $isPdf ? 'PDF' : 'Image',
+                    'size' => $file->getSize()
+                ]);
+
+                // Upload using Cloudinary Upload API
+                $uploadApi = $this->cloudinary->uploadApi();
+
+                if ($isPdf) {
+                    // For PDFs
+                    $uploadOptions['resource_type'] = 'raw';
+                    $result = $uploadApi->upload($file->getRealPath(), $uploadOptions);
+                } else {
+                    // For images with optimization
+                    $uploadOptions['transformation'] = [
+                        'quality' => 'auto:good',
+                        'fetch_format' => 'auto'
+                    ];
+                    $result = $uploadApi->upload($file->getRealPath(), $uploadOptions);
+                }
+
+                // Store file information
+                $fileInfo = [
+                    'url' => $result['secure_url'],
+                    'public_id' => $result['public_id'],
+                    'name' => $originalName . '.' . $extension,
+                    'format' => $extension,
+                    'size' => $file->getSize(),
+                    'resource_type' => $isPdf ? 'raw' : 'image',
+                    'uploaded_at' => now()->toDateTimeString(),
+                ];
+
+                $uploadedFiles[] = $fileInfo;
+
+                Log::info("Successfully uploaded to Cloudinary", [
+                    'file' => $originalName,
+                    'url' => $fileInfo['url'],
+                    'public_id' => $result['public_id']
+                ]);
+
+            } catch (\Exception $e) {
+                Log::error('Cloudinary upload failed', [
+                    'file' => $file->getClientOriginalName(),
+                    'error' => $e->getMessage(),
+                    'line' => $e->getLine()
+                ]);
+
+                // Continue with next file
+                continue;
             }
         }
 
-        return $files;
+        return $uploadedFiles;
     }
 
     /**
-     * Compress PDF files larger than 10MB using Ghostscript.
+     * Delete single file from Cloudinary
      */
-    private function compressPdf($filePath): void
+    private function deleteFromCloudinary(string $publicId, string $resourceType = 'image'): bool
     {
         try {
-            $tempPath = str_replace('.pdf', '_compressed.pdf', $filePath);
-            $cmd = "gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dNOPAUSE -dQUIET -dBATCH -sOutputFile={$tempPath} {$filePath}";
-            exec($cmd);
-            if (file_exists($tempPath)) {
-                rename($tempPath, $filePath);
-            }
+            $uploadApi = $this->cloudinary->uploadApi();
+            $uploadApi->destroy($publicId, ['resource_type' => $resourceType]);
+
+            Log::info("File deleted from Cloudinary", [
+                'public_id' => $publicId,
+                'resource_type' => $resourceType
+            ]);
+
+            return true;
         } catch (\Exception $e) {
-            // Ignore compression errors
+            Log::error('Failed to delete from Cloudinary', [
+                'public_id' => $publicId,
+                'error' => $e->getMessage()
+            ]);
+            return false;
         }
     }
 
@@ -309,7 +428,6 @@ class OrderController extends Controller
      */
     public function loadFormPartial($type, Request $request)
     {
-        // Determine which partial view to load
         $view = match ($type) {
             'ready_to_ship' => 'orders.partials.ready_to_ship',
             'custom_diamond' => 'orders.partials.custom_diamond',
@@ -321,20 +439,17 @@ class OrderController extends Controller
             return response('<div class="alert alert-danger">Invalid form type selected.</div>', 404);
         }
 
-        // Load order for edit mode if applicable
         $order = null;
         if ($request->has('edit') && $request->edit === 'true' && $request->has('id')) {
             $order = Order::find($request->id);
         }
 
-        // ✅ Fetch dropdown data required by the Ready-to-Ship form
         $companies = Company::all();
         $metalTypes = MetalType::all();
         $ringSizes = RingSize::all();
         $settingTypes = SettingType::all();
         $closureTypes = ClosureType::all();
 
-        // ✅ Return the partial view with all required data
         return view($view, compact(
             'order',
             'companies',

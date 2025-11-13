@@ -106,6 +106,22 @@
                             </div>
                         </div>
 
+                        <!-- Permission Category -->
+                        <div class="col-12">
+                            <div class="form-group-modern">
+                                <label class="form-label-modern">
+                                    <i class="bi bi-list-task me-2"></i>Permission Category
+                                    <span class="required-badge">Required</span>
+                                </label>
+                                <input type="text" name="category" id="permission_category" class="form-control-modern"
+                                    value="{{ old('category') }}" placeholder="e.g., Users, Reports, Settings" required>
+                                <small class="form-hint">
+                                    <i class="bi bi-lightbulb me-1"></i>
+                                    Group related permissions together for ease of management
+                                </small>
+                            </div>
+                        </div>
+
                         <!-- Description -->
                         <div class="col-12">
                             <div class="form-group-modern">
@@ -113,7 +129,8 @@
                                     <i class="bi bi-text-paragraph me-2"></i>Description
                                     <span class="optional-badge">Optional</span>
                                 </label>
-                                <textarea name="description" id="permission_description" class="form-control-modern" rows="4"
+                                <textarea name="description" id="permission_description" class="form-control-modern"
+                                    rows="4"
                                     placeholder="Describe when and why this permission should be granted...">{{ old('description') }}</textarea>
                                 <div class="d-flex justify-content-between align-items-center mt-2">
                                     <small class="form-hint">
@@ -633,7 +650,7 @@
 
     @push('scripts')
         <script>
-            (function() {
+            (function () {
                 function initCreatePermissionForm() {
                     const nameInput = document.getElementById('permission_name');
                     const slugInput = document.getElementById('permission_slug');
@@ -657,7 +674,7 @@
 
                     // Auto-generate slug button
                     if (generateBtn && nameInput && slugInput) {
-                        generateBtn.addEventListener('click', function() {
+                        generateBtn.addEventListener('click', function () {
                             const name = nameInput.value.trim();
                             if (name) {
                                 const slug = generateSlug(name);
@@ -672,7 +689,7 @@
 
                     // Example chips
                     document.querySelectorAll('.example-chip').forEach(chip => {
-                        chip.addEventListener('click', function() {
+                        chip.addEventListener('click', function () {
                             const slug = this.dataset.slug;
                             if (slugInput) {
                                 slugInput.value = slug;
@@ -684,7 +701,7 @@
 
                     // Character counter
                     if (descInput && charCount) {
-                        descInput.addEventListener('input', function() {
+                        descInput.addEventListener('input', function () {
                             charCount.textContent = this.value.length;
                         });
                         // Initialize
@@ -693,19 +710,19 @@
 
                     // Live preview updates
                     if (nameInput && previewName) {
-                        nameInput.addEventListener('input', function() {
+                        nameInput.addEventListener('input', function () {
                             previewName.textContent = this.value || '';
                         });
                     }
 
                     if (slugInput && previewSlug) {
-                        slugInput.addEventListener('input', function() {
+                        slugInput.addEventListener('input', function () {
                             previewSlug.textContent = this.value || '';
                         });
                     }
 
                     if (descInput && previewDesc) {
-                        descInput.addEventListener('input', function() {
+                        descInput.addEventListener('input', function () {
                             previewDesc.textContent = this.value || '';
                         });
                     }
@@ -737,9 +754,9 @@
                         toast.textContent = message;
                         document.body.appendChild(toast);
 
-                        setTimeout(function() {
+                        setTimeout(function () {
                             toast.style.animation = 'slideOut 0.3s ease';
-                            setTimeout(function() {
+                            setTimeout(function () {
                                 if (toast.parentNode) {
                                     document.body.removeChild(toast);
                                 }

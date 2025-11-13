@@ -234,9 +234,9 @@
                                         @endif
                                         <div class="permission-meta">
                                             <code class="permission-slug" onclick="copySlug('{{ $perm->slug }}', this)">
-                                                            <i class="bi bi-code-slash"></i>
-                                                            {{ $perm->slug }}
-                                                        </code>
+                                                                        <i class="bi bi-code-slash"></i>
+                                                                        {{ $perm->slug }}
+                                                                    </code>
                                             <span class="permission-type">{{ ucfirst(str_replace('_', ' ', $action)) }}</span>
                                         </div>
                                     </div>
